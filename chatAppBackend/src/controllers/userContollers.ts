@@ -1,38 +1,48 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
+dotenv.config()
 const JWT_SECRET = process.env.JWT_SECRET;
 
-export const registerUser = async (req: Request, res: Response):Promise<void> => {
+export const registerUser = async (req: Request, res: Response): Promise<void> => {
     const { name, email, password } = req.body;
 
     try {
-        
-        const existingUser = await prisma.user.findUnique({ where : {email} });
+        if (!JWT_SECRET) {
+            throw new Error("JWT_SECRET is not defined in environment variables");
+        }
+
+        const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) {
             res.status(400).json({ message: 'User already exists' });
+            console.log("User already exists");
+            
             return;
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
+        console.log(name, email, hashedPassword);
 
         const newUser = await prisma.user.create({
-            data : {
+            data: {
                 name,
                 email,
-                password: hashedPassword
+                password: hashedPassword,
             },
         });
 
-        const token = jwt.sign({ userId: newUser.id, email}, JWT_SECRET as string, { expiresIn: '1h' });
+        const token = jwt.sign({ userId: newUser.id, email }, JWT_SECRET, { expiresIn: '1h' });
 
-        res.status(201).json({ message: 'User registered successfully',token });
+        res.status(201).json({ message: 'User registered successfully', token });
     } catch (error) {
+        console.error("Error during registration:", error);
         res.status(500).json({ message: 'Server error' });
     }
 };
+
 
 export const loginUser = async (req: Request, res: Response):Promise<void> => {
     const { email, password } = req.body;

@@ -6,32 +6,25 @@ import dotenv from "dotenv";
 import routes from "./routes/index";
 import { PrismaClient } from "@prisma/client";
 
+
 dotenv.config();
 
 const prisma = new PrismaClient();
 const app = express();
+app.use(cors());
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
     origin: process.env.CLIENT_URL, // Allow your frontend domain
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
 // Middleware
-app.use(cors());
 app.use(express.json());
-
-// Log requests
-app.use((req: Request, res: Response, next: NextFunction) => {
-  console.log(`${req.method} ${req.url}`);
-  next();
-});
-
-// Routes
 app.use("/api", routes);
-
 // Socket.IO
 io.on("connection", (socket) => {
   console.log("A user connected", socket.id);

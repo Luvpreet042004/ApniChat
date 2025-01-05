@@ -4,8 +4,8 @@ import userAuthorization from '../middleware/userMiddleware';
 
 const router = express.Router();
 
-router.get('/login', loginUser);
-router.post('/create', registerUser);
+router.post('/login', loginUser);
+router.post('/register', registerUser);
 router.put('/update',userAuthorization ,updateUser);
 router.delete('/delete', userAuthorization,deleteUser);
 

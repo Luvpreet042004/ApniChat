@@ -29,7 +29,6 @@ const userAuthorization = async (req: Request, res: Response, next: NextFunction
   
 
     try {
-        
         const decoded = jwt.verify(token, JWT_SECRET as string) as {id:number, email:string};
         
 
