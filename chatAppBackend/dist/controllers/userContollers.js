@@ -21,7 +21,10 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, email, password } = req.body;
     try {
+<<<<<<< HEAD
         console.log("in register user");
+=======
+>>>>>>> 0c51cc92771aceba8e6df1da9fa2d6f823e085d7
         const existingUser = yield prisma.user.findUnique({ where: { email } });
         if (existingUser) {
             res.status(400).json({ message: 'User already exists' });

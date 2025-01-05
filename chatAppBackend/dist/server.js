@@ -27,7 +27,10 @@ const io = new socket_io_1.Server(server, {
     cors: {
         origin: process.env.CLIENT_URL, // Allow your frontend domain
         methods: ["GET", "POST"],
+<<<<<<< HEAD
         credentials: true,
+=======
+>>>>>>> 0c51cc92771aceba8e6df1da9fa2d6f823e085d7
     },
 });
 // Middleware
