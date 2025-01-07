@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import SignIn from "./pages/SignIn";
 import ChangePassword from "./pages/ChangePassword";
 import DeleteUser from "./pages/DeleteUser";
+import Dashboard from "./pages/Dashboard";
 
 const App: React.FC = () => {
   return (
@@ -13,6 +14,7 @@ const App: React.FC = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/update" element={<ChangePassword />} />
         <Route path="/delete" element={<DeleteUser />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="*" element={<SignIn />} /> {/* Default to SignIn */}
       </Routes>
     </Router>

@@ -9,11 +9,7 @@ datasource db {
 
 model User {
   id        Int     @id @default(autoincrement())
-<<<<<<< HEAD
   name      String
-=======
-  name      String  @unique
->>>>>>> 0c51cc92771aceba8e6df1da9fa2d6f823e085d7
   email     String  @unique
   password  String
   createdAt DateTime @default(now())

@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-<<<<<<< HEAD
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
@@ -21,26 +20,10 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
             res.status(400).json({ message: 'User already exists' });
             console.log("User already exists");
             
-=======
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET;
-
-export const registerUser = async (req: Request, res: Response):Promise<void> => {
-    const { name, email, password } = req.body;
-
-    try {
-        
-        const existingUser = await prisma.user.findUnique({ where : {email} });
-        if (existingUser) {
-            res.status(400).json({ message: 'User already exists' });
->>>>>>> 0c51cc92771aceba8e6df1da9fa2d6f823e085d7
             return;
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-<<<<<<< HEAD
-        console.log(name, email, hashedPassword);
 
         const newUser = await prisma.user.create({
             data: {
@@ -55,29 +38,10 @@ export const registerUser = async (req: Request, res: Response):Promise<void> =>
         res.status(201).json({ message: 'User registered successfully', token });
     } catch (error) {
         console.error("Error during registration:", error);
-=======
-
-        const newUser = await prisma.user.create({
-            data : {
-                name,
-                email,
-                password: hashedPassword
-            },
-        });
-
-        const token = jwt.sign({ userId: newUser.id, email}, JWT_SECRET as string, { expiresIn: '1h' });
-
-        res.status(201).json({ message: 'User registered successfully',token });
-    } catch (error) {
->>>>>>> 0c51cc92771aceba8e6df1da9fa2d6f823e085d7
         res.status(500).json({ message: 'Server error' });
     }
 };
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 0c51cc92771aceba8e6df1da9fa2d6f823e085d7
 export const loginUser = async (req: Request, res: Response):Promise<void> => {
     const { email, password } = req.body;
 

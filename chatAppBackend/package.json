@@ -12,15 +12,10 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^6.1.0",
-<<<<<<< HEAD
     "axios": "^1.7.9",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-=======
-    "bcrypt": "^5.1.1",
-    "bcryptjs": "^2.4.3",
->>>>>>> 0c51cc92771aceba8e6df1da9fa2d6f823e085d7
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",

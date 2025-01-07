@@ -68,34 +68,34 @@
 
 // export default Chat;
 
-import React, { useEffect } from 'react';
-import { io } from 'socket.io-client';
+// import React, { useEffect } from 'react';
+// import { io } from 'socket.io-client';
 
-const Chat : React.FC = () => {
-  const [input, setInput] = React.useState<string>("");
+// const Chat : React.FC = () => {
+//   const [input, setInput] = React.useState<string>("");
 
-  const socket = io('http://localhost:5000');
+//   const socket = io('http://localhost:5000');
 
-  useEffect(() => {
-    socket.on('connect', () => {
-      console.log("Connected to the server");
-    })
+//   useEffect(() => {
+//     socket.on('connect', () => {
+//       console.log("Connected to the server");
+//     })
 
-    socket.on('inchat', () => {
-      console.log("User joined their room");
-    });
+//     socket.on('inchat', () => {
+//       console.log("User joined their room");
+//     });
 
-    return () => {
-      socket.disconnect();
-    }
-  },[]);
+//     return () => {
+//       socket.disconnect();
+//     }
+//   },[]);
 
-  return (
-    <div>
-      <input type="text" onChange={e =>setInput(e.target.value)} placeholder="Type your message..." />
-      <button onClick={()=>{socket.emit("sendMessage",input)}}> Send </button>
-    </div>
-  );
-};
+//   return (
+//     <div>
+//       <input type="text" onChange={e =>setInput(e.target.value)} placeholder="Type your message..." />
+//       <button onClick={()=>{socket.emit("sendMessage",input)}}> Send </button>
+//     </div>
+//   );
+// };
 
-export default Chat;
+// export default Chat;
