@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
+import { log } from 'console';
 const prisma = new PrismaClient();
 dotenv.config()
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -131,6 +132,111 @@ export const deleteUser = async (req: Request, res: Response):Promise<void> => {
 
         res.status(200).json({ message: 'User deleted successfully' });
     } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+}
+
+export const getUser = async (req: Request, res: Response):Promise<void> => {
+    const email = req.body.email;
+
+    if(!email){
+        res.status(400).json({ message: 'Invalid credentials' });
+            return ;
+    }
+
+    try {
+        const user = await prisma.user.findUnique({where :{email}});
+        if (!user) {
+            res.status(400).json({ message: 'Invalid credentials' });
+            return ;
+        }
+
+        res.status(200).json({ user });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+}
+
+export const addConnection = async (req: Request, res: Response): Promise<void> => {
+    const id = req.user?.id; // Assuming `req.user` contains the authenticated user's information
+    const { connectionEmail } = req.body;
+
+    if (!id) {
+        res.status(400).json({ message: 'Invalid credentials' });
+        return;
+    }
+
+    try {
+        // Find the user making the request
+        const user = await prisma.user.findUnique({
+            where: { id },
+        });
+
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        // Find the user to be connected
+        const connectionUser = await prisma.user.findUnique({
+            where: { email: connectionEmail },
+        });
+
+        if (!connectionUser) {
+            res.status(404).json({ message: 'Connection user not found' });
+            return;
+        }
+
+        // Add the connection by updating the `connections` relation
+        await prisma.user.update({
+            where: { id: connectionUser.id },
+            data: {
+                connections: {
+                    connect: { id: id },
+                },
+            },
+        });
+
+        await prisma.user.update({
+            where: { id: id },
+            data: {
+                connections: {
+                    connect: { email: connectionEmail },
+                },
+            },
+        });
+
+        res.status(200).json({ message: 'Connection added successfully' });
+    } catch (error) {
+        console.error('Error adding connection:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+export const connections = async (req: Request, res: Response): Promise<void> => {
+    const id = req.user?.id;
+
+    if (!id) {
+        res.status(400).json({ message: 'Invalid credentials' });
+        return;
+    }
+
+    try {
+        
+        const user = await prisma.user.findUnique({
+            where: { id },
+            include: { connections: true },
+        });
+
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        res.status(200).json({ connections: user.connections });
+
+    } catch (error) {
+        console.error('Error fetching connections:', error);
         res.status(500).json({ message: 'Server error' });
     }
 }

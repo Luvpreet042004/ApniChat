@@ -11,7 +11,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@prisma/client": "^6.1.0",
+    "@prisma/client": "^6.2.0",
     "axios": "^1.7.9",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
@@ -19,7 +19,6 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "prisma": "^6.1.0",
     "socket.io": "^4.8.1",
     "zod": "^3.24.1"
   },
@@ -29,6 +28,7 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.10.3",
     "@types/socket.io": "^3.0.1",
+    "prisma": "^6.2.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2"
   }

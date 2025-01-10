@@ -17,6 +17,9 @@ model User {
 
   sentDirectMessages DirectMessage[] @relation("Sender")
   receivedDirectMessages DirectMessage[] @relation("Recipient")
+
+  connections User[] @relation("UserConnections")
+  connectedTo User[] @relation("UserConnections")
 }
 
 model DirectMessage {
