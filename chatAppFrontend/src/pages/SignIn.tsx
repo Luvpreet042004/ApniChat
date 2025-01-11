@@ -19,6 +19,9 @@ const SignIn: React.FC = () => {
             if (response.status === 201) {
                 console.log("Sign-in successful");
                 localStorage.setItem("authToken", response.data.token);
+                localStorage.setItem("userId", response.data.id);
+                localStorage.setItem("userName", response.data.name);
+                
                 navigate('/dashboard');
             }
         } catch (error) {

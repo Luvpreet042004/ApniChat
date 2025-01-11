@@ -35,13 +35,17 @@ app.use("/api", routes);
 
 // Socket.IO
 io.on("connection", (socket) => {
-  console.log("A user connected", socket.id);
-
+  console.log("User connected", socket.id);
   // Join rooms for direct messaging
-  socket.on("inchat", ({ userId }: { userId: string }) => {
-    socket.join(userId);
-    console.log(`User ${userId} joined their room`);
+  socket.on("inchat", (sid:number , rid:number) => {
+    socket.join(`chat_${Math.min(sid, rid)}_${Math.max(sid, rid)}`);
+    console.log(`User ${sid} joined their room chat_${Math.min(sid, rid)}_${Math.max(sid, rid)}`);
   });
+
+  socket.on("updateConnection", (userId) => {
+    // Emit an event to the client
+    io.emit(`connectionsUpdated:${userId}`);
+})
 
   // Listen for new messages
   socket.on("sendMessage", async (message: { senderId: string; receiverId: string; content: string }) => {

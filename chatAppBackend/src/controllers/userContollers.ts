@@ -3,7 +3,6 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
-import { log } from 'console';
 const prisma = new PrismaClient();
 dotenv.config()
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -36,7 +35,11 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
 
         const token = jwt.sign({ userId: newUser.id, email }, JWT_SECRET, { expiresIn: '1h' });
 
-        res.status(201).json({ message: 'User registered successfully', token });
+        res.status(201).json({ message: 'User registered successfully',
+                token,
+                id : newUser.id,
+                name: newUser.name,
+        });
     } catch (error) {
         console.error("Error during registration:", error);
         res.status(500).json({ message: 'Server error' });
@@ -62,7 +65,11 @@ export const loginUser = async (req: Request, res: Response):Promise<void> => {
         const token = jwt.sign({ id: user.id, email }, JWT_SECRET as string, { expiresIn: '2days' });
         
 
-        res.status(200).json({ token });
+        res.status(200).json({ message: 'Login successful',
+                token,
+                id: user.id,
+                name: user.name
+         });
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
     }
@@ -237,6 +244,23 @@ export const connections = async (req: Request, res: Response): Promise<void> =>
 
     } catch (error) {
         console.error('Error fetching connections:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+}
+
+export const checkUser = async (req: Request, res: Response): Promise<void> => {
+    const email = req.body.email;
+
+    try {
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (!user) {
+            res.status(404).json({ exists: false });
+            return;
+        }
+
+        res.status(200).json({ exists: true });
+    } catch (error) {
+        console.error('Error checking user:', error);
         res.status(500).json({ message: 'Server error' });
     }
 }

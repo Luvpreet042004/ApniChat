@@ -15,8 +15,11 @@ const Login: React.FC = () => {
             const response = await axios.post("http://localhost:5000/api/users/login", body);
 
             if (response.status === 200) {
-                console.log("Login successful");
-                localStorage.setItem("authToken", response.data.token); // Save token
+                console.log(response);
+                localStorage.setItem("authToken", response.data.token);
+                localStorage.setItem("userId", response.data.id);
+                localStorage.setItem("userName", response.data.name);
+                
                 navigate('/dashboard'); // Redirect to dashboard
             }
         } catch (error) {

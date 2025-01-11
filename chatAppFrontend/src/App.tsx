@@ -5,6 +5,7 @@ import SignIn from "./pages/SignIn";
 import ChangePassword from "./pages/ChangePassword";
 import DeleteUser from "./pages/DeleteUser";
 import Dashboard from "./pages/Dashboard";
+import SocketProvider from "./context/SocketProvider";
 
 const App: React.FC = () => {
   return (
@@ -14,8 +15,15 @@ const App: React.FC = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/update" element={<ChangePassword />} />
         <Route path="/delete" element={<DeleteUser />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="*" element={<SignIn />} /> {/* Default to SignIn */}
+        <Route
+          path="/dashboard"
+          element={
+            <SocketProvider>
+              <Dashboard />
+            </SocketProvider>
+          }
+        />
+        <Route path="*" element={<SignIn />} />
       </Routes>
     </Router>
   );
