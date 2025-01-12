@@ -6,6 +6,7 @@ import ChangePassword from "./pages/ChangePassword";
 import DeleteUser from "./pages/DeleteUser";
 import Dashboard from "./pages/Dashboard";
 import SocketProvider from "./context/SocketProvider";
+import ChatRoom from "./pages/ChatRoom";
 
 const App: React.FC = () => {
   return (
@@ -23,6 +24,14 @@ const App: React.FC = () => {
             </SocketProvider>
           }
         />
+        <Route
+  path="/dashboard/chat/:smaller/:larger"
+  element={
+    <SocketProvider>
+      <ChatRoom />
+    </SocketProvider>
+  }
+/>
         <Route path="*" element={<SignIn />} />
       </Routes>
     </Router>

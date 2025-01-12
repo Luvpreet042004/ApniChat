@@ -3,9 +3,11 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
+import { io } from '../server';
 const prisma = new PrismaClient();
 dotenv.config()
 const JWT_SECRET = process.env.JWT_SECRET;
+
 
 export const registerUser = async (req: Request, res: Response): Promise<void> => {
     const { name, email, password } = req.body;
@@ -212,6 +214,9 @@ export const addConnection = async (req: Request, res: Response): Promise<void> 
                 },
             },
         });
+
+        io.to(id.toString()).emit('updateConnection',id);
+        io.to(connectionUser.id.toString()).emit('updateConnection',connectionUser.id)
 
         res.status(200).json({ message: 'Connection added successfully' });
     } catch (error) {

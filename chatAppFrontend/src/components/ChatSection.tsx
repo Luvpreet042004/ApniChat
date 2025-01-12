@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import axios from 'axios';
 import { useSocket } from '../hooks/useSocket';
 
 interface Message {
-    id?: number
+  id?: number;
   content: string;
   senderId: number;
   receiverId: number;
@@ -16,25 +17,57 @@ const ChatComponent: React.FC = () => {
   const [input, setInput] = useState('');
   const senderId = localStorage.getItem('userId');
   const receiverId = senderId === smaller ? larger : smaller;
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToLatestMessage = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   useEffect(() => {
     if (socket && senderId && receiverId) {
+      setMessages([]); // Clear messages when sender or receiver changes
+
+      // Join the chat room
       socket.emit('inchat', Number(senderId), Number(receiverId));
 
-      // Listen for new messages
-      socket.on('newMessage', (message: Message) => {
-        setMessages((prev) => [...prev, message]);
-      });
+      const fetchMessages = async () => {
+        const token = localStorage.getItem("authToken")
+        try {
+          const response = await axios.get(
+            `http://localhost:5000/api/messages/chat/${Math.min(Number(senderId), Number(receiverId))}/${Math.max(
+              Number(senderId),
+              Number(receiverId)
+            )}`,{headers: {
+              Authorization: `Bearer ${token}`,
+          }}
+          );
+          if (Array.isArray(response.data)) {
+            setMessages(response.data);
+            scrollToLatestMessage();
+          } else {
+            console.error('Invalid message data format:', response.data);
+          }
+        } catch (error) {
+          console.error('Error fetching messages:', error);
+        }
+      };
 
-      // Cleanup on unmount
+      fetchMessages();
+
+      const handleNewMessage = (message: Message) => {
+        setMessages((prev) => [...prev, message]);
+        scrollToLatestMessage();
+      };
+
+      socket.on('receiveMessage', handleNewMessage);
+
       return () => {
-        socket.off('newMessage');
+        socket.off('receiveMessage', handleNewMessage);
       };
     }
-  }, [socket, senderId, receiverId]);
+  }, [socket, senderId, receiverId]); // Re-run when senderId or receiverId changes
 
-
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
 
     const newMessage: Message = {
@@ -42,22 +75,29 @@ const ChatComponent: React.FC = () => {
       senderId: Number(senderId),
       receiverId: Number(receiverId),
     };
-
-    // Emit the message to the server
-    if (socket) {
-      socket.emit('sendMessage', newMessage);
-    }
-
-    // Append the message locally (optimistic update)
+    
+    scrollToLatestMessage();
     setInput('');
+
+    try {
+      socket?.emit('sendMessage', newMessage, (response: { status: string }) => {
+        if (response.status !== 'ok') {
+          alert('Message failed to send. Please try again.');
+          setMessages((prev) => [...prev, newMessage]);
+        }
+      });
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
   };
 
   return (
     <div className="flex flex-col h-full w-full bg-gray-100">
+      {/* Message List */}
       <div className="flex-grow overflow-y-auto p-4 space-y-4">
-        {messages.map((message, index) => (
+        {Array.isArray(messages) && messages.map((message, index) => (
           <div
-            key={message.id || index} // Use index as a fallback if ID is missing
+            key={message.id || index}
             className={`p-3 rounded-lg max-w-xs ${
               message.senderId === Number(senderId)
                 ? 'bg-blue-500 text-white self-end'
@@ -67,8 +107,10 @@ const ChatComponent: React.FC = () => {
             {message.content}
           </div>
         ))}
+        <div ref={messagesEndRef}></div>
       </div>
 
+      {/* Input Box */}
       <div className="p-4 bg-white border-t border-gray-300 flex">
         <input
           type="text"

@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from "express";
-import { Server } from "socket.io";
+import { Server,Socket } from "socket.io";
 import http from "http";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -13,14 +13,6 @@ const app = express();
 app.use(cors());
 const server = http.createServer(app);
 
-const io = new Server(server, {
-  cors: {
-    origin: process.env.CLIENT_URL, // Allow your frontend domain
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
-});
-
 // Middleware
 app.use(express.json());
 
@@ -33,56 +25,68 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // Routes
 app.use("/api", routes);
 
-// Socket.IO
-io.on("connection", (socket) => {
-  console.log("User connected", socket.id);
-  // Join rooms for direct messaging
-  socket.on("inchat", (sid:number , rid:number) => {
-    socket.join(`chat_${Math.min(sid, rid)}_${Math.max(sid, rid)}`);
-    console.log(`User ${sid} joined their room chat_${Math.min(sid, rid)}_${Math.max(sid, rid)}`);
-  });
-
-  socket.on("updateConnection", (userId) => {
-    // Emit an event to the client
-    io.emit(`connectionsUpdated:${userId}`);
-})
-
-  // Listen for new messages
-  socket.on("sendMessage", async (message: { senderId: string; receiverId: string; content: string }) => {
-    const { senderId, receiverId, content } = message;
-
-    try {
-      // Save message to database
-      await prisma.directMessage.create({
-        data: {
-          content,
-          senderId: Number(senderId),
-          receiverId: Number(receiverId),
-          status: "sent",
-        },
-      });
-
-      // Emit message to the receiver
-      if (io.sockets.adapter.rooms.has(receiverId)) {
-        io.to(receiverId).emit("receiveMessage", message);
-      } else {
-        console.log(`Receiver ${receiverId} is not connected`);
-      }
-    } catch (error) {
-      console.error("Error saving message:", error);
-    }
-  });
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected", socket.id);
-  });
-});
-
 // Error Handling Middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
   res.status(500).json({ error: "Something went wrong!" });
 });
+
+export const io = new Server(server, {
+  cors: {
+    origin: process.env.CLIENT_URL || "http://localhost:5173", // Allow your frontend domain
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+
+io.on("connection", (socket: Socket) => {
+  console.log("User connected", socket.id);
+
+  // Handle user joining a specific chat room
+  socket.on("inchat", (sid: number, rid: number) => {
+    const room = `chat_${Math.min(sid, rid)}_${Math.max(sid, rid)}`;
+    socket.join(room);
+    console.log(`User ${sid} joined room: ${room}`);
+  });
+
+  socket.on("updateConnection", (userId: number) => {
+    // Broadcast an update event for the user's connections
+    io.emit(`connectionsUpdated:${userId}`);
+    console.log(`Connection updated for user ${userId}`);
+  });
+
+  // Listen for new messages and broadcast them to the appropriate room
+  socket.on("sendMessage", async (message: { senderId: number; receiverId: number; content: string }) => {
+    const { senderId, receiverId, content } = message;
+
+    // Compute the room name based on sender and receiver IDs
+    const room = `chat_${Math.min(senderId, receiverId)}_${Math.max(senderId, receiverId)}`;
+
+    try {
+      // Save the message to the database
+      await prisma.directMessage.create({
+        data: {
+          content,
+          senderId: senderId,
+          receiverId: receiverId,
+          status: "sent",
+        },
+      });
+
+      // Emit the message to all clients in the room
+      io.to(room).emit("receiveMessage", message);
+      console.log(`Message sent to room: ${room}`);
+    } catch (error) {
+      console.error("Error saving message:", error);
+    }
+  });
+
+  // Handle user disconnecting
+  socket.on("disconnect", () => {
+    console.log("User disconnected", socket.id);
+  });
+});
+
 
 // Graceful Shutdown for Prisma and HTTP Server
 process.on("SIGINT", async () => {

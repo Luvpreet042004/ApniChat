@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import ConnectionsList from './ConnectionsList';
 import { useConnections } from '../hooks/useConnections';
+import ChatSection from './ChatSection';
 
 const UserSection: React.FC = () => {
     const { connections, setConnections } = useConnections();
@@ -29,10 +30,6 @@ const UserSection: React.FC = () => {
         };
 
         fetchConnections();
-
-        
-
-
     }, [setConnections]);
 
     // Filtered users based on search term
@@ -67,8 +64,8 @@ const UserSection: React.FC = () => {
   </div>
 
   {/* Chat Section */}
-  <div className="col-span-2 flex justify-center items-center bg-gray-100 rounded-md shadow-md p-4">
-    <div>Select Friend to start chat....</div>
+  <div className="col-span-2 flex flex-col bg-gray-100 rounded-md shadow-md p-4">
+    <ChatSection />
   </div>
 </div>
 

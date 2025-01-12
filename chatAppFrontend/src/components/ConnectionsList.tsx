@@ -16,12 +16,14 @@ const ConnectionsList: React.FC<ConnectionsListProps> = ({ users }) => {
 
     const chatOpener = (user: User) => {
         console.log(`Opening chat with user: ${user.name} (ID: ${user.id})`);
-        // Add logic here to open the chat, update the URL, or notify the backen
-        const smaller= Math.min(user.id,Number(localStorage.getItem('userId')));
-        const larger = Math.max(user.id,Number(localStorage.getItem('userId')));
-
-        navigate(`/chat/${smaller}/${larger}`);
+    
+        const smaller = Math.min(user.id, Number(localStorage.getItem('userId')));
+        const larger = Math.max(user.id, Number(localStorage.getItem('userId')));
+    
+        // Navigate to the correct route
+        navigate(`/dashboard/chat/${smaller}/${larger}`);
     };
+    
 
     return (
         <ul className="flex-grow overflow-y-auto space-y-2">
