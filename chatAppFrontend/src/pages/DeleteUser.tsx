@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const DeleteUser: React.FC = () => {
+type Props = {
+    setIsDelete : (vale : boolean) => void
+}
+
+const DeleteUser: React.FC<Props> = ({setIsDelete}) => {
     const [password, setPassword] = useState('');
 
     const handleDelete = async(e : React.FormEvent) => {
@@ -18,6 +22,7 @@ const DeleteUser: React.FC = () => {
                 },
             });
             console.log('User account deleted successfully:', response.data);
+            setIsDelete(true)
         } catch (error) {
             console.error('Delete failed:', error);
         }
@@ -27,10 +32,11 @@ const DeleteUser: React.FC = () => {
     const handleCancel = () => {
         // Add your cancel logic here
         console.log('Delete cancelled');
+        setIsDelete(false)
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+        <div className="fixed inset-0 flex font-Inter items-center justify-center bg-black bg-opacity-70 z-50">
             <div className="bg-white p-6 rounded shadow-md w-full max-w-sm">
                 <h2 className="text-2xl font-bold mb-4">Delete User</h2>
                 <div className="mb-4">

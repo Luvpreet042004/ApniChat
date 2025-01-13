@@ -1,7 +1,9 @@
 import axios from 'axios';
+import { Route, Routes } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import ConnectionsList from './ConnectionsList';
 import { useConnections } from '../hooks/useConnections';
+import ChatComponent from './ChatSection'
 
 const UserSection: React.FC = () => {
     const { connections, setConnections } = useConnections();
@@ -9,6 +11,8 @@ const UserSection: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
+  console.log('in usersection');
+  
     useEffect(() => {
         const fetchConnections = async () => {
             try {
@@ -67,8 +71,11 @@ const UserSection: React.FC = () => {
   </div>
 
   {/* Chat Section */}
-  <div className="col-span-2 flex justify-center items-center bg-gray-100 rounded-md shadow-md p-4">
-    <div>Select Friend to start chat....</div>
+  <div className="col-span-2 z-0 flex justify-center items-center bg-gray-100 rounded-md shadow-md">
+  <Routes>
+      <Route path="/" element={<div>Select Friend to start chat....</div>} />
+      <Route path="chat/:smaller/:larger" element={<ChatComponent />} />
+    </Routes>
   </div>
 </div>
 

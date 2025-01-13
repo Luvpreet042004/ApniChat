@@ -19,8 +19,9 @@ const Login: React.FC = () => {
                 localStorage.setItem("authToken", response.data.token);
                 localStorage.setItem("userId", response.data.id);
                 localStorage.setItem("userName", response.data.name);
+                localStorage.setItem("userEmail" , response.data.email);
                 
-                navigate('/dashboard'); // Redirect to dashboard
+                navigate('/dashboard/friend'); // Redirect to dashboard
             }
         } catch (error) {
             console.error("Login failed:", error);

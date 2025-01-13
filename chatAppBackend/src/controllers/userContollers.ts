@@ -41,6 +41,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
                 token,
                 id : newUser.id,
                 name: newUser.name,
+                email : newUser.email
         });
     } catch (error) {
         console.error("Error during registration:", error);
@@ -70,7 +71,8 @@ export const loginUser = async (req: Request, res: Response):Promise<void> => {
         res.status(200).json({ message: 'Login successful',
                 token,
                 id: user.id,
-                name: user.name
+                name: user.name,
+                email: user.email
          });
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
@@ -266,6 +268,27 @@ export const checkUser = async (req: Request, res: Response): Promise<void> => {
         res.status(200).json({ exists: true });
     } catch (error) {
         console.error('Error checking user:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+}
+
+export const getFriend = async (req: Request, res: Response):Promise<void> => {
+    const id = req.params.id;
+
+    if(!id){
+        res.status(400).json({ message: 'Invalid credentials' });
+            return ;
+    }
+
+    try {
+        const user = await prisma.user.findUnique({where :{id : Number(id)}});
+        if (!user) {
+            res.status(400).json({ message: 'Invalid credentials' });
+            return ;
+        }
+
+        res.status(200).json({ id: user.id, name : user.name, email : user.email });
+    } catch (error) {
         res.status(500).json({ message: 'Server error' });
     }
 }

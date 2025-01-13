@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState,useLayoutEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { useSocket } from '../hooks/useSocket';
@@ -10,7 +10,16 @@ interface Message {
   receiverId: number;
 }
 
+type User = {
+  id: number;
+  name: string;
+  email: string;
+};
+
+
 const ChatComponent: React.FC = () => {
+  console.log("in Chat Component");
+  
   const { socket } = useSocket();
   const { smaller, larger } = useParams<{ smaller: string; larger: string }>();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -18,10 +27,12 @@ const ChatComponent: React.FC = () => {
   const senderId = localStorage.getItem('userId');
   const receiverId = senderId === smaller ? larger : smaller;
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const [otherUser,setOtherUser] = useState<User | null>()
 
   const scrollToLatestMessage = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView();
   };
+  
 
   useEffect(() => {
     if (socket && senderId && receiverId) {
@@ -29,6 +40,25 @@ const ChatComponent: React.FC = () => {
 
       // Join the chat room
       socket.emit('inchat', Number(senderId), Number(receiverId));
+
+      const fetchUser = async ()=>{
+        const token = localStorage.getItem('authToken')
+        try {
+          
+          const response= await axios.get(`http://localhost:5000/api/users/getfriend/${receiverId}`,{headers: {
+            Authorization: `Bearer ${token}`,
+        }})
+
+        const friend : User = response.data;
+        setOtherUser(friend);
+        
+        
+        } catch (error) {
+          console.error('Error fetching messages:', error);
+        }
+      }
+
+      fetchUser();
 
       const fetchMessages = async () => {
         const token = localStorage.getItem("authToken")
@@ -43,7 +73,6 @@ const ChatComponent: React.FC = () => {
           );
           if (Array.isArray(response.data)) {
             setMessages(response.data);
-            scrollToLatestMessage();
           } else {
             console.error('Invalid message data format:', response.data);
           }
@@ -66,6 +95,13 @@ const ChatComponent: React.FC = () => {
       };
     }
   }, [socket, senderId, receiverId]); // Re-run when senderId or receiverId changes
+
+
+  useLayoutEffect(() => {
+    scrollToLatestMessage();
+  }, [messages]);
+
+
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -92,9 +128,10 @@ const ChatComponent: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-gray-100">
+    <div className="flex relative z-0 flex-col h-[calc(100vh-50px)] w-full bg-gray-100">
+      <div className='absolute top-0 w-full h-14 shadow-sm bg-white font-Inter flex items-center p-2 font-medium'>{otherUser?.name}</div>
       {/* Message List */}
-      <div className="flex-grow overflow-y-auto p-4 space-y-4">
+      <div className="flex-grow overflow-y-auto custom-scrollbar p-4 mb-11 mt-10 space-y-4">
         {Array.isArray(messages) && messages.map((message, index) => (
           <div
             key={message.id || index}
@@ -111,21 +148,28 @@ const ChatComponent: React.FC = () => {
       </div>
 
       {/* Input Box */}
-      <div className="p-4 bg-white border-t border-gray-300 flex">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type a message..."
-          className="flex-grow p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          onClick={handleSend}
-          className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none"
-        >
-          Send
-        </button>
-      </div>
+      <form
+  onSubmit={(e) => {
+    e.preventDefault();
+    handleSend();
+  }}
+  className="p-4 bg-white border-t absolute bottom-0 w-full border-gray-300 flex"
+>
+  <input
+    type="text"
+    value={input}
+    onChange={(e) => setInput(e.target.value)}
+    placeholder="Type a message..."
+    className="flex-grow p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+  <button
+    type="submit"
+    className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none"
+  >
+    Send
+  </button>
+</form>
+
     </div>
   );
 };

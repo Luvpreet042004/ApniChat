@@ -3,35 +3,30 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import SignIn from "./pages/SignIn";
 import ChangePassword from "./pages/ChangePassword";
-import DeleteUser from "./pages/DeleteUser";
 import Dashboard from "./pages/Dashboard";
+// import UserProfile from "./components/Profile";
 import SocketProvider from "./context/SocketProvider";
-import ChatRoom from "./pages/ChatRoom";
 
 const App: React.FC = () => {
   return (
     <Router>
       <Routes>
+        {/* Authentication Routes */}
         <Route path="/signup" element={<SignIn />} />
         <Route path="/login" element={<Login />} />
         <Route path="/update" element={<ChangePassword />} />
-        <Route path="/delete" element={<DeleteUser />} />
+
+        {/* Dashboard Route with Nested Routing */}
         <Route
-          path="/dashboard"
+          path="/dashboard/*"
           element={
             <SocketProvider>
               <Dashboard />
             </SocketProvider>
           }
         />
-        <Route
-  path="/dashboard/chat/:smaller/:larger"
-  element={
-    <SocketProvider>
-      <ChatRoom />
-    </SocketProvider>
-  }
-/>
+
+        {/* Fallback Route for Undefined Paths */}
         <Route path="*" element={<SignIn />} />
       </Routes>
     </Router>

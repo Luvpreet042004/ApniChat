@@ -21,26 +21,26 @@ const ConnectionsList: React.FC<ConnectionsListProps> = ({ users }) => {
         const larger = Math.max(user.id, Number(localStorage.getItem('userId')));
     
         // Navigate to the correct route
-        navigate(`/dashboard/chat/${smaller}/${larger}`);
+        navigate(`/dashboard/friend/chat/${smaller}/${larger}`);
     };
     
 
     return (
-        <ul className="flex-grow overflow-y-auto space-y-2">
+        <div className="h-full overflow-y-auto scrollbar-none space-y-2">
             {users.length > 0 ? (
                 users.map((user) => (
-                    <li
+                    <div
                         key={user.id}
                         onClick={() => chatOpener(user)} // Pass the user to the handler
                         className="p-2 bg-gray-100 font-Inter rounded-md hover:bg-gray-200 transition-colors cursor-pointer"
                     >
                         {user.name}
-                    </li>
+                    </div>
                 ))
             ) : (
                 <li className="text-gray-500">No users found</li>
             )}
-        </ul>
+        </div>
     );
 };
 

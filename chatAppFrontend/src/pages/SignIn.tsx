@@ -21,8 +21,9 @@ const SignIn: React.FC = () => {
                 localStorage.setItem("authToken", response.data.token);
                 localStorage.setItem("userId", response.data.id);
                 localStorage.setItem("userName", response.data.name);
+                localStorage.setItem('userEmail',response.data.email);
                 
-                navigate('/dashboard');
+                navigate('/dashboard/friend');
             }
         } catch (error) {
             console.error("Sign-in failed:", error);
